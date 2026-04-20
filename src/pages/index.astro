@@ -1,11 +1,136 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import Layout from '../components/Layout.astro';
+import RecipeCard from '../components/RecipeCard.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Obter todas as receitas
+const recipes = await getCollection('recipes');
+
+// Extrair tags únicas
+const allTags = new Set<string>();
+recipes.forEach(recipe => {
+  if (recipe.data.tags) {
+    recipe.data.tags.forEach(tag => allTags.add(tag));
+  }
+});
+const uniqueTags = Array.from(allTags).sort();
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Início">
+	<section style="text-align: center; margin-bottom: 48px;">
+		<h1 style="color: var(--color-primary); margin-bottom: 16px;">Descubra Novas Receitas</h1>
+		<p style="color: var(--color-text-muted); font-size: 18px; max-width: 600px; margin: 0 auto; margin-bottom: 32px;">
+			Explore nossa coleção de receitas deliciosas, desde pratos rápidos para o dia a dia até criações mais elaboradas.
+		</p>
+
+		<!-- Filtros e Busca -->
+		<div style="max-width: 800px; margin: 0 auto;">
+			<div style="position: relative; margin-bottom: 24px;">
+				<input type="text" id="searchInput" placeholder="Buscar receitas por nome, descrição, categoria ou ingredientes..." style="width: 100%; padding: 16px 24px 16px 48px; border-radius: 9999px; border: 1px solid #ddd; font-size: 16px; outline: none; transition: border-color 0.2s;" />
+				<svg style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #888;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8"></circle>
+					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+				</svg>
+			</div>
+
+			<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;" id="tagFilters">
+				{uniqueTags.map(tag => (
+					<button class="tag-filter-btn" data-tag={tag.toLowerCase()} style="background-color: #f3f4f6; color: var(--color-text-muted); border: 1px solid #e5e7eb; border-radius: 9999px; padding: 8px 16px; font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500;">
+						{tag}
+					</button>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<section>
+		<div class="grid grid-cols-1 grid-cols-2 grid-cols-3" id="recipesGrid">
+			{recipes.map((recipe) => (
+				<div class="recipe-wrapper">
+					<RecipeCard recipe={recipe} />
+				</div>
+			))}
+		</div>
+		<div id="noResults" style="display: none; text-align: center; padding: 48px 0; color: var(--color-text-muted);">
+			<h3 style="font-size: 20px; margin-bottom: 8px;">Nenhuma receita encontrada</h3>
+			<p>Tente ajustar sua busca ou remover alguns filtros.</p>
+		</div>
+	</section>
 </Layout>
+
+<script>
+	const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+	const tagButtons = document.querySelectorAll('.tag-filter-btn');
+	const recipeWrappers = document.querySelectorAll('.recipe-wrapper');
+	const noResults = document.getElementById('noResults');
+	let activeTags = new Set<string>();
+
+	// Função de filtragem principal
+	function filterRecipes() {
+		const searchTerm = searchInput.value.toLowerCase().trim();
+		let visibleCount = 0;
+
+		recipeWrappers.forEach(wrapper => {
+			const card = wrapper.querySelector('.recipe-card') as HTMLElement;
+			if (!card) return;
+
+			const title = card.dataset.title || '';
+			const description = card.dataset.description || '';
+			const category = card.dataset.category || '';
+			const tagsStr = card.dataset.tags || '';
+			const tags = tagsStr.split(',').filter(Boolean);
+
+			// Verifica busca por texto
+			const matchesSearch = searchTerm === '' || 
+				title.includes(searchTerm) || 
+				description.includes(searchTerm) || 
+				category.includes(searchTerm);
+
+			// Verifica filtro por tags (uma receita precisa ter TODAS as tags selecionadas para aparecer, ou ajustamos para QUALQUER)
+			// Vamos fazer a lógica "E" (AND) para refinar, ou "OU" (OR) se preferir. "OU" é mais amigável.
+			// Se activeTags está vazio, passa. Se não, tem que ter pelo menos uma das activeTags (OR).
+			let matchesTags = true;
+			if (activeTags.size > 0) {
+				matchesTags = Array.from(activeTags).some(tag => tags.includes(tag));
+			}
+
+			if (matchesSearch && matchesTags) {
+				(wrapper as HTMLElement).style.display = 'block';
+				visibleCount++;
+			} else {
+				(wrapper as HTMLElement).style.display = 'none';
+			}
+		});
+
+		if (noResults) {
+			noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+		}
+	}
+
+	// Event Listener para busca
+	if (searchInput) {
+		searchInput.addEventListener('input', filterRecipes);
+	}
+
+	// Event Listeners para botões de tag
+	tagButtons.forEach(btn => {
+		btn.addEventListener('click', (e) => {
+			const target = e.currentTarget as HTMLElement;
+			const tag = target.dataset.tag;
+			if (!tag) return;
+
+			if (activeTags.has(tag)) {
+				activeTags.delete(tag);
+				target.style.backgroundColor = '#f3f4f6';
+				target.style.color = 'var(--color-text-muted)';
+				target.style.borderColor = '#e5e7eb';
+			} else {
+				activeTags.add(tag);
+				target.style.backgroundColor = 'var(--color-primary)';
+				target.style.color = 'white';
+				target.style.borderColor = 'var(--color-primary)';
+			}
+			filterRecipes();
+		});
+	});
+</script>

@@ -1,0 +1,26 @@
+---
+interface Props {
+  category: string;
+}
+
+const { category } = Astro.props;
+
+// Função para mapear a categoria para a cor correta baseada no global.css
+function getCategoryColor(cat: string) {
+  switch (cat) {
+    case 'Aves': return 'var(--color-cat-aves)';
+    case 'Peixes e Frutos do Mar': return 'var(--color-cat-peixes)';
+    case 'Carne Suína': return 'var(--color-cat-suina)';
+    case 'Carne Bovina': return 'var(--color-cat-bovina)';
+    case 'Vegetariano': return 'var(--color-cat-vegetariano)';
+    case 'Pães e Massas': return 'var(--color-cat-massas)';
+    default: return 'var(--color-primary)';
+  }
+}
+
+const backgroundColor = getCategoryColor(category);
+---
+
+<span style={`background-color: ${backgroundColor}; color: white; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;`}>
+  {category}
+</span>
