@@ -1,5 +1,5 @@
 ---
-title: "Lasanha à Bolonhesa"
+title: "Lasanha à Bolonhesa da Vovó"
 description: "Um clássico saboroso de camadas de massa, carne moída suculenta e molho béchamel cremoso, gratinado até ficar dourado."
 category: "Receitas"
 tags: []
