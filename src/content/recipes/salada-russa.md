@@ -6,7 +6,7 @@ tags: []
 image: "https://unsplash.com/pt-br/fotografias/arroz-cozido-com-ovo-ykThMylLsbY"
 prepTime: "45 min"
 cookTime: ""
-servings: "4"
+servings: "5"
 ---
 Uma deliciosa receita gerada por IA baseada na sua referência.
 
