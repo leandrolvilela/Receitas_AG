@@ -1,5 +1,5 @@
 ---
-title: "Bolo de Chocolate Simples e Fofinho"
+title: "Bolo de Chocolate Simples e Fofinho*******"
 description: "Uma receita clássica, úmida e deliciosa de bolo de chocolate perfeito para o café da tarde."
 category: "Sobremesas"
 tags: ["doce", "fácil", "forno"]
