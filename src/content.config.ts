@@ -8,13 +8,14 @@ const recipes = defineCollection({
     title: z.string(),
     description: z.string(),
     category: z.enum([
-      'Aves', 
-      'Peixes e Frutos do Mar', 
-      'Carne Suína', 
-      'Carne Bovina', 
-      'Vegetariano', 
+      'Aves',
+      'Peixes e Frutos do Mar',
+      'Carne Suína',
+      'Carne Bovina',
+      'Vegetariano',
       'Pães e Massas',
-      'Sobremesas'
+      'Sobremesas',
+      'Receitas'
     ]),
     tags: z.array(z.string()).default([]),
     image: z.string().optional(),
